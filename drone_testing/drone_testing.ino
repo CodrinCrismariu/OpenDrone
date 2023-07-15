@@ -9,23 +9,39 @@
 MPU6050 mpu (Wire);
 QuadcopterController quad;
 
+double predictedPitch = 0;
+double predictedRoll = 0;
+
 double realPitch = 0;
 double realRoll = 0;
+double realYaw = 0;
 
 double desiredPitch = 0;
 double desiredRoll = 0;
+double desiredYaw = 0;
 
 double pitchOutput = 0;
 double rollOutput = 0;
+double yawOutput = 0;
 
-double hover = 0.46;
-double pitchHover = 0.01;
-double rollHover = 0;
+double x = 0, y = 0, z = 0;
+double slamRoll = 0, slamPitch = 0, slamYaw = 0;
 
-// PID pitchPID(&realPitch, &pitchOutput, &desiredPitch, 0.005, 0.002, 0.001, DIRECT);
-// PID rollPID(&realRoll, &rollOutput, &desiredRoll, 0.005, 0.002, 0.001, DIRECT);
-PID pitchPID(&realPitch, &pitchOutput, &desiredPitch, 0.003, 0, 0.001, DIRECT);
-PID rollPID(&realRoll, &rollOutput, &desiredRoll, 0.003, 0, 0.001, DIRECT);
+double hover = 520;
+double hoverOutput = 0;
+double desiredY = 0;
+double desiredX = 0;
+double desiredZ = 0;
+
+PID pitchPID(&predictedPitch, &pitchOutput, &desiredPitch, 1.5, 2, 0, DIRECT);
+PID rollPID(&predictedRoll, &rollOutput, &desiredRoll, 1.5, 2, 0, DIRECT);
+PID yawPID(&realYaw, &yawOutput, &desiredYaw, 0.5, 0, 0, DIRECT);
+
+PID hoverPID(&desiredY, &hoverOutput, &y, 20, 0, 0, DIRECT);
+PID positionPitchPID(&x, &desiredPitch, &desiredX, 2, 0, 0, DIRECT);
+PID positionRollPID(&z, &desiredRoll, &desiredZ, 2, 0, 0, DIRECT);
+
+unsigned long lastTime = 0;
 
 void setup() {
 
@@ -49,51 +65,57 @@ void setup() {
 
   pitchPID.SetMode(AUTOMATIC);
   rollPID.SetMode(AUTOMATIC);
+  yawPID.SetMode(AUTOMATIC);
+  hoverPID.SetMode(AUTOMATIC);
+  positionPitchPID.SetMode(AUTOMATIC);
+  positionRollPID.SetMode(AUTOMATIC);
+  
 
-  pitchPID.SetSampleTime(8);
-  rollPID.SetSampleTime(8);
+  pitchPID.SetSampleTime(4);
+  rollPID.SetSampleTime(4);
+  yawPID.SetSampleTime(4);
+  hoverPID.SetSampleTime(4);
+  positionPitchPID.SetSampleTime(4);
+  positionRollPID.SetSampleTime(4);
 
-  pitchPID.SetOutputLimits(-100, 100);
-  rollPID.SetOutputLimits(-100, 100);
+  for(int i = 0; i < 10; i++) mpu.Execute();
+
+  desiredYaw = mpu.GetAngZ();
+
+  pitchPID.SetOutputLimits(-400, 400);
+  rollPID.SetOutputLimits(-400, 400);
+  yawPID.SetOutputLimits(-400, 400);
+  hoverPID.SetOutputLimits(-400, 400);
+  positionPitchPID.SetOutputLimits(-10, 10);
+  positionRollPID.SetOutputLimits(-10, 10);
+
+  lastTime = micros();
 }
 
 /*
  *  Loop
  */
-
-double x = 0, y = 0, z = 0;
-double slamRoll = 0, slamPitch = 0, slamYaw = 0;
 double Data[6];
+bool STARTED_SLAM = false;
  
-double PITCH_OFFSET = -1.11;
-double ROLL_OFFSET = 0.1;
+double PITCH_OFFSET = -0.96;
+double ROLL_OFFSET = 0.12 + 1;
 
-bool STOP = true;
+bool STOP = false;
 
 // double Setpoint, Input, Output;
 // PID myPID(&Input, &Output, &Setpoint,2,5,1, DIRECT);
 
+double deceleration = 180; // deg per second
+
+double filter = 0.9;
+double lastPredictedPitch = 0;
+double lastPredictedRoll = 0;
  
 void loop() {
 
-  mpu.Execute();
-
-  Serial.print(pitchPID.Compute());
-  Serial.print(rollPID.Compute());
-
-  realPitch = mpu.GetAngX() + PITCH_OFFSET;
-  realRoll = mpu.GetAngY() + ROLL_OFFSET;
-  // Yaw not accurate enough
-  // Yaw not accurate enough
-  
   updateBuffer();
 
-//  for(int i = 0; i < 6; i++) {
-//    Serial.print(Data[i]);
-//    Serial.print(' ');  
-//  }
-//
-//  Serial.println();
   x = Data[0];
   y = Data[1];
   z = Data[2];
@@ -101,18 +123,53 @@ void loop() {
   slamYaw = Data[4] / PI * 180;
   slamRoll = Data[5] / PI * 180;
 
+  mpu.Execute();
+
+  pitchPID.Compute();
+  rollPID.Compute();
+  yawPID.Compute();
+  hoverPID.Compute();
+  positionPitchPID.Compute();
+  positionRollPID.Compute();
+
+  realPitch = mpu.GetAngX() + PITCH_OFFSET;
+  realRoll = mpu.GetAngY() + ROLL_OFFSET;
+  realYaw = mpu.GetAngZ();
+
+  if(STARTED_SLAM) realYaw = slamYaw;
+
+  double angVelPitch = mpu.GetGyroX();
+  double angVelRoll = mpu.GetGyroY();
+
+  double pitchTime = abs(angVelPitch / deceleration);
+  double rollTime = abs(angVelRoll / deceleration);
+
+  predictedPitch = (pitchTime * angVelPitch / 2 + realPitch) * filter + (1 - filter) * lastPredictedPitch;
+  predictedRoll = (rollTime * angVelRoll / 2 + realRoll) * filter + (1 - filter) * lastPredictedRoll;
+
+  for(int i = 0; i < 6; i++) {
+    Serial.print(Data[i]);
+    Serial.print(' ');  
+  }
+
+  Serial.print(STARTED_SLAM);
+
+  Serial.println();
+
   if(realPitch > 30 || realRoll > 30 || realPitch < -30 || realRoll < -30) STOP = true;
 
-  Serial.print("Pitch: ");
-  Serial.print(realPitch);
-  Serial.print("\t");
-  Serial.print("Roll: ");
-  Serial.println(realRoll);
-
   if(STOP) quad.setSpeed(0, 0, 0, 0);
-  else quad.setSpeed(hover, rollOutput + rollHover, pitchOutput + pitchHover, 0);
-  if(STOP)
-  Serial.println("Emergency stop");
+  else if(STARTED_SLAM) quad.setSpeed(hover + hoverOutput, rollOutput, pitchOutput, yawOutput);
+
+  lastPredictedRoll = predictedRoll;
+  lastPredictedPitch = predictedPitch;
+
+  while(micros() - lastTime < 3900);
+
+  // Serial.print("loop time(us): ");
+  // Serial.println(micros() - lastTime);
+  lastTime = micros();
+  
 }
 
 unsigned short bufferIndex = 0;
@@ -128,6 +185,8 @@ void processBuffer() {
 
    bufferIndex = 0;
    dataIndex = 0;
+
+   STARTED_SLAM = true;
 }
 
 void updateBuffer() {
