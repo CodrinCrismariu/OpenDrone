@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
 
     cv::Mat imLeft, imRight;
-    cv::VideoCapture leftCap = cv::VideoCapture(0), rightCap = cv::VideoCapture(2);
+    cv::VideoCapture leftCap = cv::VideoCapture(2), rightCap = cv::VideoCapture(0);
     cv::Vec3f rotation = cv::Vec3f();
     cv::Vec3f translation = cv::Vec3f();
     
