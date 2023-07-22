@@ -1,0 +1,21 @@
+%YAML:1.0
+
+# Camera calibration and distortion parameters (OpenCV) 
+LeftCamera.fx: 678.154
+LeftCamera.fy: 678.17
+LeftCamera.cx: 318.135
+LeftCamera.cy: 228.374
+
+RightCamera.fx: 678.154
+RightCamera.fy: 678.17
+RightCamera.cx: 318.135
+RightCamera.cy: 228.374
+
+# stereo baseline times fx
+stereo_baseline: 6.4 # dist between cameras
+
+NUM_THREADS: 2
+
+# Close/Far threshold. Baseline times.
+ThDepth: 35
+
