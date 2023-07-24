@@ -24,8 +24,7 @@ cu doi ochi observa "adancimea" imaginilor primite de la ochi.
 Pentru acesta folosim doua camere accesebile Microsoft LifeCam 3000
 pentru care prinderea a trecut prin mai multe iteratii.
 
-![](./media/image8.png){width="3.7343755468066493in"
-height="2.0948928258967627in"}
+![](./media/image8.png)
 
 ##### MK1
 
