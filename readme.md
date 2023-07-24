@@ -134,8 +134,7 @@ mai usoara si de 2 ori mai compacta decat cea originala.
 
 Pentru drona am decis sa folosesc un frame standard F450 pentru
 stabilitate [, pentru ca e open source si pentru ca poate fi complet
-printat 3D]{.mark}.![](./media/image6.png){width="5.692708880139983in"
-height="3.713455818022747in"}
+printat 3D]{.mark}.![](./media/image6.png)
 
 #### Motoarele![](./media/image5.png)
 
@@ -163,8 +162,7 @@ outputul final folosind formula:
 ***angle = (last_angle + Δgyroscope_reading) \* 0.98 +
 Δaccelerometer_reading \* 0.02***
 
-![](./media/image1.jpg){width="4.770833333333333in"
-height="3.8958333333333335in"}
+![](./media/image1.jpg)
 
 Aloritmul PID este scris manual si urmeaza standardele algoritmilor pid
 industriali cu un update rate de 250Hz. Acesta urmeaza flowul gasit in
