@@ -1,3 +1,5 @@
+# OpenDrone
+
 Idee: OpenDrone este un prototip pentru o drona autonoma de cost scazut.
 Aceasta este facut din doua sisteme diferite: Drona + Sistem de
 Localizare.
@@ -31,7 +33,7 @@ height="2.0948928258967627in"}
 
 -   Camerele nu stateau destul de fixe
 
-##### ![](./media/image4.png){width="4.830288713910761in" height="2.7148337707786525in"}MK2
+##### ![](./media/image4.png)MK2
 
 Folosind doar circuitul integrat al camerei + lentila putem sa facem
 camera mult mai usoara si compacta. PCBurile ne dau si o metoda de
@@ -95,7 +97,7 @@ folosim un Intel NUC(NUC8i3BEK) cu o carcasa custom printata 3d care a
 trecut prin mai multe iteratii pentru a ajunge la o varianta de 3 ori
 mai usoara si de 2 ori mai compacta decat cea originala.
 
-![](./media/image3.jpg){width="3.375in" height="2.53125in"}
+![](./media/image3.jpg)
 
 ##### Carcasa originala
 
@@ -105,8 +107,7 @@ mai usoara si de 2 ori mai compacta decat cea originala.
 
 -   Multe piese metalice care nu sunt necesare
 
-![](./media/image7.png){width="5.604166666666667in"
-height="2.8020833333333335in"}
+![](./media/image7.png)
 
 ##### MK1
 
@@ -118,7 +119,7 @@ height="2.8020833333333335in"}
 
 -   Nu are metode de prindere de drona
 
-##### MK2![](./media/image2.png){width="5.231481846019247in" height="2.9427088801399823in"}
+##### MK2![](./media/image2.png)
 
 -   Foarte compact
 
@@ -137,7 +138,7 @@ stabilitate [, pentru ca e open source si pentru ca poate fi complet
 printat 3D]{.mark}.![](./media/image6.png){width="5.692708880139983in"
 height="3.713455818022747in"}
 
-#### Motoarele![](./media/image5.png){width="4.380208880139983in" height="4.104166666666667in"}
+#### Motoarele![](./media/image5.png)
 
 Pentru a face drona sa zboare folosim Motoare BLDC de 1000kv pe care
 le-am testat impreuna cu o elice 1045 pentru mai multe tensiuni si
